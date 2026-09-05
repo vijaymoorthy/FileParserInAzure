@@ -24,7 +24,7 @@ namespace Fileprocessing
         {
 
 
-            log.LogInformation($"************** RunOrchestrator method executing ********************");
+            log.LogInformation($"************** RunOrchestrator method executing at {context.CurrentUtcDateTime:O} ********************");
             List<TransferFileInfo> files = await context.CallActivityAsync<List<TransferFileInfo>>(
               "FileShareReader",
               null);
