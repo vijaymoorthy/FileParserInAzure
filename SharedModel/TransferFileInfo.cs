@@ -8,20 +8,20 @@ namespace Shared.Fileprocessing
 {
     public class TransferFileInfo
     {
-        public string FileName { get; set; }
-        public string TextLine { get; set; }
+        public string? FileName { get; set; }
+        public string? TextLine { get; set; }
 
         public bool IsPatternMatched { get; set; }
     }
 
     public class Greeting
     {
-        public string CityName { get; set; }
-        public string Message { get; set; }
+        public string? CityName { get; set; }
+        public string? Message { get; set; }
     }
 
     public class GreetingsRequest
     {
-        public List<Greeting> Greetings { get; set; }
+        public List<Greeting> Greetings { get; set; } = new();
     }
 }
