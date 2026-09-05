@@ -22,13 +22,14 @@ namespace Fileprocessing
             public static async Task<string> RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context, ILogger log)
         {
+            ILogger replaySafeLogger = context.CreateReplaySafeLogger(log);
 
 
-            log.LogInformation($"************** RunOrchestrator method executing at {context.CurrentUtcDateTime:O} ********************");
+            replaySafeLogger.LogInformation("************** RunOrchestrator method executing at {ExecutionTime:O} ********************", context.CurrentUtcDateTime);
             List<TransferFileInfo> files = await context.CallActivityAsync<List<TransferFileInfo>>(
               "FileShareReader",
               null);
-            log.LogInformation($"************** Splitter  fan out and Function chain********************");
+            replaySafeLogger.LogInformation("************** Splitter  fan out and Function chain********************");
             List<TransferFileInfo> splitfiles = new List<TransferFileInfo>();
             foreach (var file in files)
             {
@@ -36,7 +37,7 @@ namespace Fileprocessing
               "Filespliter",
               file);              
             }
-            log.LogInformation($"************** send message with Fanning out ********************");
+            replaySafeLogger.LogInformation("************** send message with Fanning out ********************");
             var parallelActivities = new List<Task<string>>();
             foreach (var file in splitfiles)
             {
@@ -48,14 +49,14 @@ namespace Fileprocessing
                 parallelActivities.Add(task);
             }
             // Wait until all the activity functions have done their work
-            log.LogInformation($"************** 'Waiting' for parallel results ********************");
+            replaySafeLogger.LogInformation("************** 'Waiting' for parallel results ********************");
             await Task.WhenAll(parallelActivities);
-            log.LogInformation($"************** All activity functions complete ********************");
+            replaySafeLogger.LogInformation("************** All activity functions complete ********************");
 
             // Now that all parallel activity functions have completed,
             // fan in AKA aggregate the results, in this case into a single
             // string using a StringBuilder
-            log.LogInformation($"************** fanning in ********************");
+            replaySafeLogger.LogInformation("************** fanning in ********************");
             var sb = new StringBuilder();
             foreach (var completedParallelActivity in parallelActivities)
             {
