@@ -143,6 +143,7 @@ namespace Fileprocessing
                 {
                     //var outputs = new List<Task<string>>();
 
+                    // Iterate over the files and directories in the source directory.
                     await foreach (ShareFileItem item in directory.GetFilesAndDirectoriesAsync())
                     {
                         //copy the file to Staging folder                        
