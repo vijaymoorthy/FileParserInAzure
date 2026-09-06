@@ -1,0 +1,8 @@
+# Repository configuration that governs AI agents must be human-reviewed.
+# An agent that can edit its own instructions is not governed by them.
+/.github/                       @vijaymoorthy
+/.github/copilot-instructions.md @vijaymoorthy
+/.github/instructions/          @vijaymoorthy
+/.github/agents/                @vijaymoorthy
+/.github/prompts/               @vijaymoorthy
+/.github/workflows/             @vijaymoorthy
