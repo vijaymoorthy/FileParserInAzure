@@ -24,12 +24,6 @@ namespace AzureFunctionDurableSubscriber
 
             string result=await context.CallActivityAsync<string>("ParseFiles", transferFileInfo);    
 
-            //var sb = new StringBuilder();
-            //foreach (var completedParallelActivity in parallelActivities)
-            //{
-            //    sb.AppendLine(completedParallelActivity.Result);
-            //}
-
             return result;
         }
 

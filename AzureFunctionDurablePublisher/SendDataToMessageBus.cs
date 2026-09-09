@@ -58,10 +58,10 @@ namespace Fileprocessing
         }
 
         [FunctionName("FanOutIn_ActivityFunction")]
-        public static string SayHello([ActivityTrigger] Greeting greeting, ILogger log)
+        public static async Task<string> SayHello([ActivityTrigger] Greeting greeting, ILogger log)
         {
             // simulate longer processing delay to demonstrate parallelism
-            Thread.Sleep(15000);
+            await Task.Delay(15000);
 
             return $"{greeting.Message} {greeting.CityName}";
         }
