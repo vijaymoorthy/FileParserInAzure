@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AzureFunctionDurableSubscriber
@@ -21,7 +20,11 @@ namespace AzureFunctionDurableSubscriber
         public static string ParseFiles([ActivityTrigger] TransferFileInfo transferFileInfo, ILogger log)
         {
             string PATTERN =Environment.GetEnvironmentVariable("PartenMatching");
-            transferFileInfo.IsPatternMatched = ValidatePattern(new StringReader(transferFileInfo.TextLine), PATTERN, CancellationToken.None);
+            bool isPatternMatched = ValidatePattern(new StringReader(transferFileInfo.TextLine), PATTERN);
+            if (!isPatternMatched)
+            {
+                transferFileInfo.IsPatternMatched = false;
+            }
             log.LogInformation($"ParseFiles {transferFileInfo.FileName}.");
             if (!transferFileInfo.IsPatternMatched)
             {
@@ -32,19 +35,17 @@ namespace AzureFunctionDurableSubscriber
             
         }
 
-        internal static bool ValidatePattern(TextReader reader, string pattern, CancellationToken cancellationToken)
+        internal static bool ValidatePattern(TextReader reader, string pattern)
         {
             string line;
             while ((line = reader.ReadLine()) != null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 if (!Regex.IsMatch(line, WildCardToRegular(pattern)))
                 {
                     return false;
                 }
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
             return true;
         }
 

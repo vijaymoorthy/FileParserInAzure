@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading;
 using AzureFunctionDurableSubscriber;
 using Xunit;
 
@@ -11,7 +10,7 @@ namespace FileParserInAzure.Tests
         [Fact]
         public void ValidatePattern_EmptyInput_ReturnsTrue()
         {
-            bool result = ParsingFileAndDelete.ValidatePattern(new StringReader(string.Empty), "anything", CancellationToken.None);
+            bool result = ParsingFileAndDelete.ValidatePattern(new StringReader(string.Empty), "anything");
 
             Assert.True(result);
         }
@@ -21,8 +20,7 @@ namespace FileParserInAzure.Tests
         {
             bool result = ParsingFileAndDelete.ValidatePattern(
                 new StringReader("value-1\r\nvalue-2"),
-                "value-*",
-                CancellationToken.None);
+                "value-*");
 
             Assert.True(result);
         }
@@ -32,8 +30,7 @@ namespace FileParserInAzure.Tests
         {
             bool result = ParsingFileAndDelete.ValidatePattern(
                 new StringReader("[literal"),
-                "[literal",
-                CancellationToken.None);
+                "[literal");
 
             Assert.True(result);
         }
@@ -43,21 +40,9 @@ namespace FileParserInAzure.Tests
         {
             bool result = ParsingFileAndDelete.ValidatePattern(
                 new StringReader("value-1\r\nother"),
-                "value-*",
-                CancellationToken.None);
+                "value-*");
 
             Assert.False(result);
-        }
-
-        [Fact]
-        public void ValidatePattern_CancelledToken_ThrowsOperationCanceledException()
-        {
-            CancellationToken cancellationToken = new CancellationToken(true);
-
-            Assert.Throws<OperationCanceledException>(() => ParsingFileAndDelete.ValidatePattern(
-                new StringReader("value"),
-                "value",
-                cancellationToken));
         }
 
         [Fact]

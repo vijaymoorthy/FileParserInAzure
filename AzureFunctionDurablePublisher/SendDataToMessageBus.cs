@@ -70,11 +70,11 @@ namespace Fileprocessing
         public static async Task<List<TransferFileInfo>> Filespliter([ActivityTrigger] TransferFileInfo file, ILogger log)
         {
             int SPLIT_BY_LINES = Convert.ToInt32(Environment.GetEnvironmentVariable("MaxLineSize"));
-            return await Task.FromResult(SplitFile(new StringReader(file.TextLine), file.FileName, SPLIT_BY_LINES, CancellationToken.None));
+            return await Task.FromResult(SplitFile(new StringReader(file.TextLine), file.FileName, SPLIT_BY_LINES));
 
         }
 
-        internal static List<TransferFileInfo> SplitFile(TextReader reader, string fileName, int maxLineSize, CancellationToken cancellationToken)
+        internal static List<TransferFileInfo> SplitFile(TextReader reader, string fileName, int maxLineSize)
         {
             if (maxLineSize <= 0)
             {
@@ -88,7 +88,6 @@ namespace Fileprocessing
 
             while ((line = reader.ReadLine()) != null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 countLine++;
                 currentLines += line + "\r\n";
                 if (countLine >= maxLineSize)
@@ -104,7 +103,6 @@ namespace Fileprocessing
                 }
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
             if (countLine <= maxLineSize)
             {
                 samefilenumber++;
