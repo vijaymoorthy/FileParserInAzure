@@ -76,6 +76,11 @@ namespace Fileprocessing
 
         internal static List<TransferFileInfo> SplitFile(TextReader reader, string fileName, int maxLineSize, CancellationToken cancellationToken)
         {
+            if (maxLineSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxLineSize), "The maximum line size must be greater than zero.");
+            }
+
             string line;
             int countLine = 0, samefilenumber = 1;
             string currentLines = string.Empty;
