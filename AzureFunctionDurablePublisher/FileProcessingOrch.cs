@@ -50,7 +50,7 @@ namespace Fileprocessing
             }
             // Wait until all the activity functions have done their work
             replaySafeLogger.LogInformation("************** 'Waiting' for parallel results ********************");
-            await Task.WhenAll(parallelActivities);
+            var results = await Task.WhenAll(parallelActivities);
             replaySafeLogger.LogInformation("************** All activity functions complete ********************");
 
             // Now that all parallel activity functions have completed,
@@ -58,9 +58,9 @@ namespace Fileprocessing
             // string using a StringBuilder
             replaySafeLogger.LogInformation("************** fanning in ********************");
             var sb = new StringBuilder();
-            foreach (var completedParallelActivity in parallelActivities)
+            foreach (var result in results)
             {
-                sb.AppendLine(completedParallelActivity.Result);
+                sb.AppendLine(result);
             }
 
             return sb.ToString();
