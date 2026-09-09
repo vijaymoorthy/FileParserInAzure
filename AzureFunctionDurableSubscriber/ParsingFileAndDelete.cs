@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AzureFunctionDurableSubscriber
@@ -20,17 +21,7 @@ namespace AzureFunctionDurableSubscriber
         public static string ParseFiles([ActivityTrigger] TransferFileInfo transferFileInfo, ILogger log)
         {
             string PATTERN =Environment.GetEnvironmentVariable("PartenMatching");
-            string line = string.Empty;
-            var allLineReader = new StringReader(transferFileInfo.TextLine);
-            while ((line = allLineReader.ReadLine()) != null)
-            {
-                //if any line in the file is not matched the entire file is rejected
-                if (!Regex.IsMatch(line, WildCardToRegular(PATTERN)))
-                {
-                    transferFileInfo.IsPatternMatched = false;                    
-                    break;
-                }
-            }
+            transferFileInfo.IsPatternMatched = ValidatePattern(new StringReader(transferFileInfo.TextLine), PATTERN, CancellationToken.None);
             log.LogInformation($"ParseFiles {transferFileInfo.FileName}.");
             if (!transferFileInfo.IsPatternMatched)
             {
@@ -41,9 +32,23 @@ namespace AzureFunctionDurableSubscriber
             
         }
 
+        internal static bool ValidatePattern(TextReader reader, string pattern, CancellationToken cancellationToken)
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!Regex.IsMatch(line, WildCardToRegular(pattern)))
+                {
+                    return false;
+                }
+            }
 
-       
-        static String WildCardToRegular(String value)
+            cancellationToken.ThrowIfCancellationRequested();
+            return true;
+        }
+
+        internal static String WildCardToRegular(String value)
         {
             return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
         }
