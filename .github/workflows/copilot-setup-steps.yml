@@ -32,4 +32,4 @@ jobs:
         run: dotnet restore AzureFuncSendFileToAzureBus.sln
 
       - name: Verify SDK visible to the agent
-        run: dotnet --info | head -20
+        run: dotnet --info
