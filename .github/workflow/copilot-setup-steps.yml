@@ -1,0 +1,35 @@
+# Pre-installs the toolchain in the Copilot cloud agent's environment so it can
+# build and test before opening a PR. Without this, the agent reported on PR #5:
+# "build validation is blocked because this environment lacks the required .NET 6 runtime".
+# The job MUST be named copilot-setup-steps; only steps/permissions/runs-on/
+# services/snapshot/timeout-minutes are honoured.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install .NET 6 SDK (target framework of this solution)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Restore
+        run: dotnet restore AzureFuncSendFileToAzureBus.sln
+
+      - name: Verify SDK visible to the agent
+        run: dotnet --info | head -20
