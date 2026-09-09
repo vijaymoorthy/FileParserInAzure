@@ -69,49 +69,51 @@ namespace Fileprocessing
         [FunctionName("Filespliter")]
         public static async Task<List<TransferFileInfo>> Filespliter([ActivityTrigger] TransferFileInfo file, ILogger log)
         {
+            int SPLIT_BY_LINES = Convert.ToInt32(Environment.GetEnvironmentVariable("MaxLineSize"));
+            return await Task.FromResult(SplitFile(new StringReader(file.TextLine), file.FileName, SPLIT_BY_LINES));
 
-            var reader = new StringReader(file.TextLine);
+        }
+
+        internal static List<TransferFileInfo> SplitFile(TextReader reader, string fileName, int maxLineSize)
+        {
+            if (maxLineSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxLineSize), "The maximum line size must be greater than zero.");
+            }
+
             string line;
             int countLine = 0, samefilenumber = 1;
-            int SPLIT_BY_LINES = Convert.ToInt32(Environment.GetEnvironmentVariable("MaxLineSize"));
             string currentLines = string.Empty;
-
-
             List<TransferFileInfo> transferFileInfos = new List<TransferFileInfo>();
 
             while ((line = reader.ReadLine()) != null)
             {
                 countLine++;
-                Console.WriteLine($"{line}");
                 currentLines += line + "\r\n";
-                if (countLine >= SPLIT_BY_LINES)
+                if (countLine >= maxLineSize)
                 {
-
                     transferFileInfos.Add(new TransferFileInfo
                     {
-                        FileName = $"{file.FileName}_{samefilenumber}",
+                        FileName = $"{fileName}_{samefilenumber}",
                         TextLine = currentLines
                     });
                     samefilenumber++;
                     currentLines = string.Empty;
                     countLine = 0;
                 }
-
             }
 
-            if (countLine <= SPLIT_BY_LINES)
+            if (countLine <= maxLineSize)
             {
                 samefilenumber++;
                 transferFileInfos.Add(new TransferFileInfo
                 {
-                    FileName = $"{file.FileName}_{samefilenumber}",
+                    FileName = $"{fileName}_{samefilenumber}",
                     TextLine = currentLines
                 });
             }
 
-            await Task.Delay(1);
             return transferFileInfos;
-
         }
 
 

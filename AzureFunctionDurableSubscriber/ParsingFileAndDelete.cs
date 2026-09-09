@@ -20,16 +20,10 @@ namespace AzureFunctionDurableSubscriber
         public static string ParseFiles([ActivityTrigger] TransferFileInfo transferFileInfo, ILogger log)
         {
             string PATTERN =Environment.GetEnvironmentVariable("PartenMatching");
-            string line = string.Empty;
-            var allLineReader = new StringReader(transferFileInfo.TextLine);
-            while ((line = allLineReader.ReadLine()) != null)
+            bool isPatternMatched = ValidatePattern(new StringReader(transferFileInfo.TextLine), PATTERN);
+            if (!isPatternMatched)
             {
-                //if any line in the file is not matched the entire file is rejected
-                if (!Regex.IsMatch(line, WildCardToRegular(PATTERN)))
-                {
-                    transferFileInfo.IsPatternMatched = false;                    
-                    break;
-                }
+                transferFileInfo.IsPatternMatched = false;
             }
             log.LogInformation($"ParseFiles {transferFileInfo.FileName}.");
             if (!transferFileInfo.IsPatternMatched)
@@ -41,9 +35,21 @@ namespace AzureFunctionDurableSubscriber
             
         }
 
+        internal static bool ValidatePattern(TextReader reader, string pattern)
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (!Regex.IsMatch(line, WildCardToRegular(pattern)))
+                {
+                    return false;
+                }
+            }
 
-       
-        static String WildCardToRegular(String value)
+            return true;
+        }
+
+        internal static String WildCardToRegular(String value)
         {
             return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
         }

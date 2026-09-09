@@ -35,4 +35,4 @@ jobs:
         run: dotnet build AzureFuncSendFileToAzureBus.sln -c Release --no-restore
 
       - name: Verify SDK visible to the agent
-        run: dotnet --info | head -20
+        run: dotnet --info
